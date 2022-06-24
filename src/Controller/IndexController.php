@@ -46,32 +46,50 @@ class IndexController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $formdata = $form->getData();
+
+
             $url = $formdata['url'];
-            $url = strstr($url, basename($url), true);
-            $session->set('url', $url);
+            if(strpos($url, '?') !== false){
+                $source = strstr($url,'?',true);
+            }else{
+                $source = $url; 
+            }
+
+            $url_dir = strstr($source, basename($source), true);
+            
+            $session->set('url', $url_dir);
+
+            $domain = parse_url( $url, PHP_URL_HOST );
+
+
+            $root = 'downloads/'.date('Ymd').'_'. preg_replace('/[^a-zA-Z0-9]+/', '_', $domain);
+
+            $destination = $root.parse_url( $url , PHP_URL_PATH ) ;
 
             
-            $data = file_get_contents($formdata['url']);
-            $domain = $formdata['url'];
+            /*
+            print 'url -> '.$url.'<hr>';
+            print 'root -> '.$root.'<hr>';
+            print 'source -> '.$source.'<hr>';
+            print 'domain -> '.$domain.'<hr>';
+            print 'destination -> '.$destination.'<hr>';
+            dd($domain);
+            */
 
-
-            $data = str_replace('../','------/',$data);
-
-            $filesystem = new Filesystem();
-
-            $root = 'downloads/'.date('Ymd').'_'. preg_replace('/[^a-zA-Z0-9]+/', '_', parse_url( $url, PHP_URL_HOST )).'/';
+            
             $filesystem = new Filesystem();
     
             try {
                 $filesystem->mkdir(
                     Path::normalize($root),
                 );
-                $filesystem->dumpFile($root.'index.htm', $data);
+
+                $filesystem->copy($source, $destination);
             } catch (IOExceptionInterface $exception) {
                 die( "Error create index ".$exception->getPath() );
             }
 
-            return new RedirectResponse($root.'index.htm');
+            return new RedirectResponse($destination);
 
         }
 

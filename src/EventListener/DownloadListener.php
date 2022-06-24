@@ -29,7 +29,7 @@ class DownloadListener
             }
     
             $filesystem = new Filesystem();
-    
+
 
             
             $local_dir =  dirname( parse_url( $request->getPathInfo() , PHP_URL_PATH ) );
@@ -38,12 +38,22 @@ class DownloadListener
             $paths = explode('/',$path);
 
             $dir = '/'.$paths[1].'/'.$paths[2].'/';
+            $domain = parse_url( $url, PHP_URL_SCHEME ).'://'.parse_url( $url, PHP_URL_HOST );
 
             $destination =  '.'.$request->getPathInfo();
-    
+
             $sourcePath = trim(str_replace($dir,'',$path),'/');
-            $source = $url.$sourcePath;
-            $source = str_replace('------/','../',$source);
+            $source = $domain.'/'.$sourcePath;
+            
+            /*
+            print 'url -> '.$url.'<hr>';
+            print 'path -> '.$path.'<hr>';
+            print 'dir -> '.$dir.'<hr>';
+            print 'domain -> '.$domain.'<hr>';
+            print 'source -> '.$source.'<hr>';
+            print 'destination -> '.$destination.'<hr>';
+            dd();
+            */
             
             try {
                 $filesystem->copy($source, $destination);

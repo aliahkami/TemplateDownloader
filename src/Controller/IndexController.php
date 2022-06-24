@@ -36,7 +36,6 @@ class IndexController extends AbstractController
 
         $session = new Session();
         $session->start();
-        $session->set('url', '');
 
         $form = $this->createFormBuilder()
             ->add('url', TextType::class)
@@ -55,6 +54,9 @@ class IndexController extends AbstractController
             $data = file_get_contents($formdata['url']);
             $domain = $formdata['url'];
 
+
+            $data = str_replace('../','------/',$data);
+
             $filesystem = new Filesystem();
 
             $root = 'downloads/'.date('Ymd').'_'. preg_replace('/[^a-zA-Z0-9]+/', '_', parse_url( $url, PHP_URL_HOST )).'/';
@@ -64,12 +66,12 @@ class IndexController extends AbstractController
                 $filesystem->mkdir(
                     Path::normalize($root),
                 );
-                $filesystem->dumpFile($root.'default.html', $data);
+                $filesystem->dumpFile($root.'index.htm', $data);
             } catch (IOExceptionInterface $exception) {
                 die( "Error create index ".$exception->getPath() );
             }
 
-            return new RedirectResponse($root);
+            return new RedirectResponse($root.'index.htm');
 
         }
 

@@ -30,24 +30,26 @@ class DownloadListener
     
             $filesystem = new Filesystem();
     
-    
+
             
             $local_dir =  dirname( parse_url( $request->getPathInfo() , PHP_URL_PATH ) );
 
             $path = $request->getPathInfo();
             $paths = explode('/',$path);
 
-            $dir = '/'.$paths[1].'/'.$paths[2];
+            $dir = '/'.$paths[1].'/'.$paths[2].'/';
 
             $destination =  '.'.$request->getPathInfo();
     
-            $sourcePath = str_replace($dir,'',$path);
+            $sourcePath = trim(str_replace($dir,'',$path),'/');
             $source = $url.$sourcePath;
-    
+            $source = str_replace('------/','../',$source);
+            
             try {
                 $filesystem->copy($source, $destination);
     
             } catch (IOExceptionInterface $exception) {
+                print 'from:'.$source.' to:'.$destination;
                 die( "Error copy file ".$exception->getPath() );
             }
 
